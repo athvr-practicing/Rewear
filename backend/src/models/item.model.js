@@ -40,13 +40,8 @@ const itemSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['available', 'pending', 'swapped', 'removed'], 
+    enum: ['available', 'swapped', 'removed'], 
     default: 'available' 
-  },
-  approvalStatus: { 
-    type: String, 
-    enum: ['pending', 'approved', 'rejected'], 
-    default: 'pending' 
   },
   pointsRequired: { 
     type: Number, 
@@ -71,6 +66,6 @@ const itemSchema = new mongoose.Schema({
 
 itemSchema.index({ title: 'text', description: 'text', tags: 'text' });
 itemSchema.index({ uploader: 1 });
-itemSchema.index({ status: 1, approvalStatus: 1 });
+itemSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Item', itemSchema);

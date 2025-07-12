@@ -16,7 +16,7 @@ const specificItem = async (req, res) => {
     const item = await Item.findById(id)
       .populate('category', 'name description')
       .populate('uploader', 'name email')
-      .select('title description category type size condition imageKey status approvalStatus pointsRequired uploader swapPreference createdAt updatedAt');
+      .select('title description category type size condition imageKey status pointsRequired uploader swapPreference createdAt updatedAt');
 
     if (!item) {
       return res.status(404).json({
@@ -53,10 +53,9 @@ const specificItem = async (req, res) => {
       uploader: item.uploader._id,
       _id: { $ne: id },
       status: 'available',
-      approvalStatus: 'approved',
     })
       .populate('category', 'name description')
-      .select('title description category type size condition imageKey status approvalStatus pointsRequired swapPreference createdAt updatedAt')
+      .select('title description category type size condition imageKey status pointsRequired swapPreference createdAt updatedAt')
       .skip(pastListingsSkip)
       .limit(pastListingsLimit)
       .sort({ createdAt: -1 });
@@ -65,7 +64,6 @@ const specificItem = async (req, res) => {
       uploader: item.uploader._id,
       _id: { $ne: id },
       status: 'available',
-      approvalStatus: 'approved',
     });
 
     // Generate pre-signed URLs for past listings

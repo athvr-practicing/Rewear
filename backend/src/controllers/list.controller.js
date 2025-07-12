@@ -9,20 +9,12 @@ let listItem = async (req, res) => {
     const sortBy = req.query.sortBy || 'createdAt';
     const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
     const status = req.query.status || 'available';
-    const approvalStatus = req.query.approvalStatus || 'approved';
     const uploader = req.query.uploader; // Filter by uploader ID
     const uploaderName = req.query.uploaderName; // Filter by uploader name
 
     const query = {
       status,
     };
-
-    // Handle multiple approval statuses (comma-separated)
-    if (approvalStatus.includes(',')) {
-      query.approvalStatus = { $in: approvalStatus.split(',') };
-    } else {
-      query.approvalStatus = approvalStatus;
-    }
 
     // Add uploader filter if provided
     if (uploader) {
@@ -51,7 +43,7 @@ let listItem = async (req, res) => {
     const items = await Item.find(query)
       .populate('category', 'name description')
       .populate('uploader', 'name email')
-      .select('title description category type size condition imageKey status approvalStatus pointsRequired uploader swapPreference createdAt updatedAt')
+      .select('title description category type size condition imageKey status pointsRequired uploader swapPreference createdAt updatedAt')
       .skip(skip)
       .limit(limit)
       .sort({ [sortBy]: sortOrder });

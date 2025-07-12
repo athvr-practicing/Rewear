@@ -49,18 +49,18 @@ const swapComplete = async (req, res) => {
     }
 
     // Validate requestedItem
-    if (swap.requestedItem.status !== 'available' || swap.requestedItem.approvalStatus !== 'approved') {
+    if (swap.requestedItem.status !== 'available') {
       return res.status(400).json({
         success: false,
-        message: 'Requested item is not available or approved',
+        message: 'Requested item is not available',
       });
     }
 
     // Validate offeredItem if present
-    if (swap.offeredItem && (swap.offeredItem.status !== 'available' || swap.offeredItem.approvalStatus !== 'approved')) {
+    if (swap.offeredItem && swap.offeredItem.status !== 'available') {
       return res.status(400).json({
         success: false,
-        message: 'Offered item is not available or approved',
+        message: 'Offered item is not available',
       });
     }
 

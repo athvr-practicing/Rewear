@@ -28,7 +28,6 @@ interface UserItem {
   pointsRequired: number;
   swapPreference: string;
   status: string;
-  approvalStatus: string;
   createdAt: string;
   uploader: {
     _id: string;
@@ -408,11 +407,6 @@ const UserProfile: FC<UserProfileProps> = ({
       url.searchParams.append('uploaderName', username || '');
       url.searchParams.append('status', 'available');
       
-      // If viewing own profile, also show pending items
-      if (isOwnProfile) {
-        url.searchParams.set('approvalStatus', 'pending,approved');
-      }
-      
       console.log('🔍 Fetching from URL:', url.toString());
       
       const response = await fetch(url.toString(), {
@@ -580,7 +574,7 @@ const UserProfile: FC<UserProfileProps> = ({
       )}
 
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 py-16">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -588,10 +582,10 @@ const UserProfile: FC<UserProfileProps> = ({
                 {username.charAt(0).toUpperCase()}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
               @{username}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-blue-100 mb-6">
               {userItems.length} {userItems.length === 1 ? 'item' : 'items'} in closet
             </p>
             <div className="flex justify-center space-x-4">
@@ -612,7 +606,7 @@ const UserProfile: FC<UserProfileProps> = ({
       </div>
 
       {/* Closet Section */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
             {isOwnProfile ? 'My Closet' : `${username}'s Closet`}
@@ -734,7 +728,7 @@ const UserProfile: FC<UserProfileProps> = ({
                     </button>
                   </div>
                   
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <h3 className="font-medium text-sm text-gray-900 mb-1 line-clamp-2">
                       {item.title}
                     </h3>
@@ -746,21 +740,9 @@ const UserProfile: FC<UserProfileProps> = ({
                         Size {item.size}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-500 capitalize">
-                        {item.condition} • {item.category.name}
-                      </p>
-                      {item.approvalStatus === 'pending' && (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                          Pending
-                        </span>
-                      )}
-                      {item.approvalStatus === 'rejected' && (
-                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                          Rejected
-                        </span>
-                      )}
-                    </div>
+                    <p className="text-xs text-gray-500 capitalize">
+                      {item.condition} • {item.category.name}
+                    </p>
                   </div>
                 </a>
               </div>

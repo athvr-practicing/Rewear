@@ -89,7 +89,7 @@ router.get('/test-user-items/:username', async (req, res) => {
     const items = await Item.find({ uploader: user._id })
       .populate('category', 'name description')
       .populate('uploader', 'name email')
-      .select('title description category type size condition imageKey status approvalStatus pointsRequired uploader swapPreference createdAt updatedAt');
+      .select('title description category type size condition imageKey status pointsRequired uploader swapPreference createdAt updatedAt');
     
     console.log('🔍 Found items:', items.length);
     

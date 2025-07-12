@@ -4,8 +4,7 @@ const { z } = require("zod");
 const ItemTypeEnum = z.enum(["men", "women", "unisex", "kids"]);
 const SizeEnum = z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL", "Other"]);
 const ConditionEnum = z.enum(["new", "like new", "good", "fair", "poor"]);
-const StatusEnum = z.enum(["available", "pending", "swapped", "removed"]);
-const ApprovalStatusEnum = z.enum(["pending", "approved", "rejected"]);
+const StatusEnum = z.enum(["available", "swapped", "removed"]);
 const SwapPreferenceEnum = z.enum(["points", "swap", "both"]);
 
 // Define the Zod schema for Item
@@ -26,7 +25,6 @@ const ItemSchema = z.object({
   condition: ConditionEnum.default("good"),
   imageKey: z.string({ required_error: "Max one img allowed" }),
   status: StatusEnum.default("available"),
-  approvalStatus: ApprovalStatusEnum.default("pending"),
   pointsRequired: z.number().min(0).default(0),
   uploader: z
     .string({ required_error: "An item must belong to a user" })
