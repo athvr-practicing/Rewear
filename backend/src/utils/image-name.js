@@ -1,4 +1,4 @@
-function genrateImgname(name){
+function genrateImgname(user){
     let cleanName = user.name
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '-')
@@ -8,7 +8,7 @@ function genrateImgname(name){
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 6);
 
-    imgName = cleanName+"-"+timestamp+"-"+random
+    const imgName = cleanName+"-"+timestamp+"-"+random
     return imgName;
 }
 
