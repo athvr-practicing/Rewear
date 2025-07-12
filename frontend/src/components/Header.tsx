@@ -1,53 +1,45 @@
 import { useState } from 'react';
 import type { FC } from 'react';
-import LoginModal from '../views/auth/LoginModal';
-import SignUpModal from '../views/auth/SignUpModal';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header: FC = () => {
-  const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  return (
-    <>
-      {/* Auth Modals */}
-      {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          switchToSignup={() => {
-            setShowLogin(false);
-            setShowSignup(true);
-          }}
-        />
-      )}
-      {showSignup && (
-        <SignUpModal
-          onClose={() => setShowSignup(false)}
-          switchToLogin={() => {
-            setShowSignup(false);
-            setShowLogin(true);
-          }}
-        />
-      )}
-
-      <div className="sticky top-0 z-40 transform-gpu transition-[transform,opacity,backgroundColor] will-change-transform border-b-[0.5px] bg-white border-gray-200">
-        <div className="relative">
-          <header className="relative mx-auto my-0 max-w-none px-4 py-3 lg:px-6 lg:py-4 transition-all">
-            <div className="min-h-[44px] items-center justify-between flex">
-              {/* Logo and Navigation */}
-              <div className="absolute flex items-center gap-10 ease-[cubic-bezier(0.42,0,0.58,1)] transition-opacity opacity-100">
-                <a href="/" className="flex items-center">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-2">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
-                      </svg>
-                    </div>
-                    <span className="text-xl font-semibold text-gray-900 tracking-[-0.02em] leading-none">
-                      ReWear
-                    </span>
-                  </div>
-                </a>
-              </div>
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+    return (
+        <div className="sticky top-0 z-40 transform-gpu transition-[transform,opacity,backgroundColor] will-change-transform border-b-[0.5px] bg-white border-gray-200">
+            <div className="relative">
+                <header className="relative mx-auto my-0 max-w-none px-4 py-3 lg:px-6 lg:py-4 transition-all">
+                    <div className="min-h-[44px] items-center justify-between flex">
+                        {/* Logo and Navigation */}
+                        <div className="absolute flex items-center gap-10 ease-[cubic-bezier(0.42,0,0.58,1)] transition-opacity opacity-100">
+                            <a href="/" className="flex items-center">
+                                <div className="flex items-center">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-2">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                                        </svg>
+                                    </div>
+                                    <span className="text-xl font-semibold text-gray-900 tracking-[-0.02em] leading-none">
+                                        ReWear
+                                    </span>
+                                </div>
+                            </a>
+                            
+                            {/* <nav className="max-lg:hidden flex items-center space-x-8">
+                                <a href="/" className="text-gray-600 hover:text-gray-900 font-medium transition-colors opacity-50">
+                                    Home
+                                </a>
+                                <a href="/explore" className="text-gray-900 font-medium">
+                                    Explore
+                                </a>
+                            </nav> */}
+                        </div>
 
               {/* Right Actions */}
               <div className="ml-auto flex items-center gap-2">
@@ -75,24 +67,53 @@ const Header: FC = () => {
                   </button>
                 </div>
 
-                {/* Auth Buttons */}
-                <div className="ml-2 flex gap-2">
-                  <button 
-                    onClick={() => setShowLogin(true)}
-                    className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
-                  >
-                    Sign in
-                  </button>
-                  <button 
-                    onClick={() => setShowSignup(true)}
-                    className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
-                  >
-                    Sign up
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
+                            {/* Authentication Section */}
+                            {isAuthenticated ? (
+                                <div className="ml-2 flex items-center gap-2">
+                                    <div className="hidden sm:flex items-center gap-2">
+                                        {user?.avatarUrl && (
+                                            <img 
+                                                src={user.avatarUrl} 
+                                                alt={user.name} 
+                                                className="w-8 h-8 rounded-full"
+                                            />
+                                        )}
+                                        <span className="text-sm font-medium text-gray-700">
+                                            {user?.name}
+                                        </span>
+                                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                            </svg>
+                                            <span>{user?.points} pts</span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
+                                    >
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="ml-2 flex items-center gap-2">
+                                    <Link 
+                                        to="/login"
+                                        className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
+                                    >
+                                        <span>Sign in</span>
+                                    </Link>
+                                    <Link 
+                                        to="/signup"
+                                        className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
+                                    >
+                                        <span>Sign up</span>
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
 
           {/* Search Section */}
           <div data-testid="SearchInputWrapper" className="pointer-events-none relative top-0 z-10 flex items-center justify-center lg:absolute lg:inset-x-[230px] lg:h-full xl:inset-x-[250px] ease-[cubic-bezier(0.42,0,0.58,1)] transition-opacity lg:visible">
