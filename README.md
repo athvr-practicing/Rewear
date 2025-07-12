@@ -10,6 +10,7 @@ Welcome to **Rewear**, the solution for Odoo Hackathon 2025
 
 Rewear is a community-driven platform designed to make exchanging, donating, and discovering pre-loved clothing easy and fun. Our mission is to promote sustainability, reduce textile waste, and build a vibrant community of eco-conscious individuals.
 
+###Project video link :- https://drive.google.com/file/d/1bYzRarFiFF57hqHjDf5y1ZWOCnhGkjGB/view?usp=sharing
 ---
 
 ## 📋 Table of Contents
