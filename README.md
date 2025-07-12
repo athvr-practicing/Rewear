@@ -113,4 +113,3 @@ See [LICENSE](frontend/LICENSE) for details.
 
 ---
 
-> **Made with ❤️ by Team Dominators for
