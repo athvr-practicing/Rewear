@@ -1,7 +1,8 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const generateAvatarSeed = require('../utils/avator');
+const validator = require('validator');
+const { generateAvatarSeed, getAvatarUrl } = require('../utils/avator');
 
 const Register = async (req, res) => {
   try {
@@ -10,14 +11,14 @@ const Register = async (req, res) => {
     if ( !email || !password || !name || !location) {
       return res.status(400).json({ 
         success: false,
-        message: "All fields (username, email, password, name) are required" 
+        message: "All fields (email, password, name, location) are required" 
       });
     }
 
     if (password.length < 8) {
       return res.status(400).json({ 
         success: false,
-        message: "Password must be at least 6 characters" 
+        message: "Password must be at least 8 characters" 
       });
     }
 
@@ -36,13 +37,7 @@ const Register = async (req, res) => {
       });
     }
 
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(409).json({ 
-        success: false,
-        message: "Username already taken. Please choose a different one." 
-      });
-    }
+
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -75,11 +70,10 @@ const Register = async (req, res) => {
       data: {
         user: {
           _id: newUser._id,
-          username: newUser.username,
           email: newUser.email,
           name: newUser.name,
           location: newUser.location,
-          avatarUrl,
+          avatarUrl: getAvatarUrl(avatarSeed),
           points: newUser.points
         },
         token
