@@ -1,36 +1,53 @@
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import axios from 'axios';
 
-export default function LoginModal({ onClose, switchToSignup }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+interface LoginModalProps {
+  onClose: () => void;
+  switchToSignup: () => void;
+}
 
-  const handleLogin = async (e) => {
+export default function LoginModal({ onClose, switchToSignup }: LoginModalProps) {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  interface LoginResponse {
+    message: string;
+    accessToken?: string;
+    [key: string]: any;
+  }
+
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     
     try {
-      const res = await axios.post("http://localhost:3000/auth/login", { email, password });
+      const res = await axios.post<LoginResponse>("http://localhost:3000/auth/login", { email, password });
       if (res?.data?.message === "Successfully logged in") {
-        localStorage.setItem("user-access-token", res?.data?.accessToken);
-        onClose(); // Close modal on success
+        localStorage.setItem("user-access-token", res?.data?.accessToken ?? "");
+        onClose();
       } else {
         setError("Invalid credentials. Please try again.");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setError(typeof err === 'string' ? err : "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0,0,0,0.35)'
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative">
         <div className="flex justify-between items-center p-5 border-b">
           <h2 className="text-2xl font-bold text-gray-800">Login to ReWear</h2>
           <button 
