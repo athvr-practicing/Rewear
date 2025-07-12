@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import type { FC } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -229,8 +229,8 @@ const Header: FC = () => {
           </div>
         </div>
       </div>
-    </>
+
   );
-};
+}
 
 export default Header;
