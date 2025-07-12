@@ -1,7 +1,6 @@
 const Item = require('../models/item.model');
 const Category = require('../models/category.model');
 const putFileURL = require('../aws/s3/upload-file');
-
 const generateImgname = require('../utils/image-name');
 
 const createItem = async (req, res) => {

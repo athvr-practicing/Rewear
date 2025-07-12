@@ -1,5 +1,5 @@
-import { S3Client } from "@aws-sdk/client-s3";
-import { configDotenv } from "dotenv";
+const { S3Client } = require("@aws-sdk/client-s3");
+const { configDotenv } = require("dotenv");
 
 configDotenv();
 const client = new S3Client({
@@ -10,4 +10,4 @@ const client = new S3Client({
   },
 });
 
-export default client;
+module.exports = client;
