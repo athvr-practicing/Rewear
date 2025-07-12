@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const dbConnection = require("./db/db.js");
 const AuthRouter = require("./routes/auth.route.js");
 const ItemRoute = require("./routes/item.route.js");
+const Listcat = require("./routes/categories.route.js");
 
 dbConnection()
 
@@ -21,7 +22,7 @@ app.use(express.urlencoded({extended: true}))
 
 app.use("api/auth", AuthRouter)
 app.use("api/", ItemRoute)
-app.use("api/categories", )
+app.use("api/categories", Listcat)
 
 app.get("/", (req, res)=>{
     res.send("hey")
