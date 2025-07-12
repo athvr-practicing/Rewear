@@ -1,4 +1,5 @@
 const Item = require("../models/item.model");
+const getFile = require("../aws/s3/get-file");
 
 let listItem = async (req, res) => {
   try {
@@ -9,11 +10,43 @@ let listItem = async (req, res) => {
     const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
     const status = req.query.status || 'available';
     const approvalStatus = req.query.approvalStatus || 'approved';
+    const uploader = req.query.uploader; // Filter by uploader ID
+    const uploaderName = req.query.uploaderName; // Filter by uploader name
 
     const query = {
       status,
-      approvalStatus,
     };
+
+    // Handle multiple approval statuses (comma-separated)
+    if (approvalStatus.includes(',')) {
+      query.approvalStatus = { $in: approvalStatus.split(',') };
+    } else {
+      query.approvalStatus = approvalStatus;
+    }
+
+    // Add uploader filter if provided
+    if (uploader) {
+      query.uploader = uploader;
+    }
+
+    // If filtering by uploader name, find the user first
+    if (uploaderName && !uploader) {
+      const User = require('../models/user.model');
+      const user = await User.findOne({ name: uploaderName }).select('_id');
+      if (user) {
+        query.uploader = user._id;
+      } else {
+        // If user not found, return empty results
+        return res.status(200).json({
+          success: true,
+          data: [],
+          count: 0,
+          total: 0,
+          page,
+          totalPages: 0,
+        });
+      }
+    }
 
     const items = await Item.find(query)
       .populate('category', 'name description')
@@ -30,9 +63,22 @@ let listItem = async (req, res) => {
         let imageUrl = null;
         if (item.imageKey) {
           try {
-            imageUrl = await getFile(item.imageKey); // Generate pre-signed URL
+            console.log('🔧 Getting signed URL for imageKey:', item.imageKey);
+            imageUrl = await getFile(item.imageKey); // Use imageKey as stored in DB
+            console.log('✅ Generated image URL:', imageUrl?.substring(0, 100) + '...');
           } catch (error) {
-            console.error(`Failed to generate signed URL for key ${item.imageKey}:`, error);
+            console.error(`❌ Failed to generate signed URL for key ${item.imageKey}:`, error);
+            // Fallback: try with uploads prefix if not already included
+            if (!item.imageKey.includes('uploads/')) {
+              try {
+                console.log('🔧 Trying fallback with uploads prefix...');
+                const fallbackKey = `uploads/${item.imageKey}.jpeg`;
+                imageUrl = await getFile(fallbackKey);
+                console.log('✅ Fallback succeeded with key:', fallbackKey);
+              } catch (fallbackError) {
+                console.error(`❌ Fallback also failed:`, fallbackError);
+              }
+            }
           }
         }
         return {

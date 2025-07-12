@@ -62,14 +62,17 @@ const createItem = async (req, res) => {
     }
 
     // Generate image name and S3 key
-    const imgName = generateImgname(user); // Fixed user reference
+    const imgName = generateImgname(user);
     const fileExt = 'jpeg';
     const fileKey = `uploads/${imgName}.${fileExt}`;
 
-    // Generate pre-signed URL for upload
-    const uploadUrl = await putFileURL(fileKey);
+    console.log('🔧 Creating item with image key:', imgName);
+    console.log('🔧 S3 file key:', fileKey);
 
-    // Create new item
+    // Generate pre-signed URL for upload
+    const uploadUrl = await putFileURL(fileKey, 'image/jpeg');
+
+    // Create new item (store the full S3 key for consistency)
     const newItem = await Item.create({
       title,
       description,
@@ -77,11 +80,13 @@ const createItem = async (req, res) => {
       type,
       size,
       condition,
-      imageKey: imgName,
+      imageKey: fileKey, // Store the full S3 key (uploads/filename.jpeg)
       pointsRequired,
       swapPreference,
       uploader: req.user._id,
     });
+    
+    console.log('✅ Created item with imageKey:', fileKey);
 
     res.status(201).json({
       success: true,

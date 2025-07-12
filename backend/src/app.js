@@ -21,8 +21,8 @@ app.use(express.urlencoded({extended: true}))
 
 
 app.use("/api/auth", AuthRouter)
-app.use("api/", ItemRoute)
-app.use("api/categories", Listcat)
+app.use("/api", ItemRoute)
+app.use("/api/categories", Listcat)
 
 app.get("/", (req, res)=>{
     res.send("hey")

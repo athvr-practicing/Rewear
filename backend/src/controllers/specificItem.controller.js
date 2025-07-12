@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Item = require("../models/item.model");
 const getFile = require("../aws/s3/get-file")
 
@@ -28,9 +29,19 @@ const specificItem = async (req, res) => {
     let imageUrl = null;
     if (item.imageKey) {
       try {
+        console.log('🔧 Getting signed URL for item imageKey:', item.imageKey);
         imageUrl = await getFile(item.imageKey);
       } catch (error) {
-        console.error(`Failed to generate signed URL for key ${item.imageKey}:`, error);
+        console.error(`❌ Failed to generate signed URL for key ${item.imageKey}:`, error);
+        // Fallback for older items
+        if (!item.imageKey.includes('uploads/')) {
+          try {
+            const fallbackKey = `uploads/${item.imageKey}.jpeg`;
+            imageUrl = await getFile(fallbackKey);
+          } catch (fallbackError) {
+            console.error(`❌ Fallback also failed:`, fallbackError);
+          }
+        }
       }
     }
 
@@ -65,7 +76,16 @@ const specificItem = async (req, res) => {
           try {
             listingImageUrl = await getFile(listing.imageKey);
           } catch (error) {
-            console.error(`Failed to generate signed URL for key ${listing.imageKey}:`, error);
+            console.error(`❌ Failed to generate signed URL for key ${listing.imageKey}:`, error);
+            // Fallback for older items
+            if (!listing.imageKey.includes('uploads/')) {
+              try {
+                const fallbackKey = `uploads/${listing.imageKey}.jpeg`;
+                listingImageUrl = await getFile(fallbackKey);
+              } catch (fallbackError) {
+                console.error(`❌ Fallback also failed:`, fallbackError);
+              }
+            }
           }
         }
         return {

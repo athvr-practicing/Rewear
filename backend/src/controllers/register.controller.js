@@ -7,6 +7,8 @@ const userSchema = require('../schemas/user.schema');
 
 const Register = async (req, res) => {
   try {
+    const {email, password, name, location } = req.body;
+    
     if ( !email || !password || !name || !location) {
       return res.status(400).json({ 
         success: false,

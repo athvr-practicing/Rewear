@@ -1,236 +1,217 @@
 
 import type { FC } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsDropdownOpen(false);
   };
-    return (
-        <div className="sticky top-0 z-40 transform-gpu transition-[transform,opacity,backgroundColor] will-change-transform border-b-[0.5px] bg-white border-gray-200">
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdown on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  return (
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                  <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <span className="text-xl font-bold text-gray-900">ReWear</span>
+            </Link>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-xl mx-8">
             <div className="relative">
-                <header className="relative mx-auto my-0 max-w-none px-4 py-3 lg:px-6 lg:py-4 transition-all">
-                    <div className="min-h-[44px] items-center justify-between flex">
-                        {/* Logo and Navigation */}
-                        <div className="absolute flex items-center gap-10 ease-[cubic-bezier(0.42,0,0.58,1)] transition-opacity opacity-100">
-                            <a href="/" className="flex items-center">
-                                <div className="flex items-center">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-2">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-                                            <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z" fill="currentColor"/>
-                                        </svg>
-                                    </div>
-                                    <span className="text-xl font-semibold text-gray-900 tracking-[-0.02em] leading-none">
-                                        ReWear
-                                    </span>
-                                </div>
-                            </a>
-                            
-                            {/* <nav className="max-lg:hidden flex items-center space-x-8">
-                                <a href="/" className="text-gray-600 hover:text-gray-900 font-medium transition-colors opacity-50">
-                                    Home
-                                </a>
-                                <a href="/explore" className="text-gray-900 font-medium">
-                                    Explore
-                                </a>
-                            </nav> */}
-                        </div>
-
-              {/* Right Actions */}
-              <div className="ml-auto flex items-center gap-2">
-                {/* Desktop Icons */}
-                <div className="hidden items-center lg:flex lg:gap-1">
-                  <button 
-                    type="button" 
-                    className="rounded-full transition relative flex items-center justify-center active:scale-[0.96] p-[10px] text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 transform-gpu"
-                    aria-label="Sign in to view saved items"
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-700" style={{width:"24px", height:"24px"}} stroke="none">
-                      <path d="M10.7966 4.30255L11.9999 5.53674L13.2034 4.30255C15.3006 2.15177 18.6827 2.1219 20.8156 4.21294L20.905 4.30255C23.0021 6.45334 23.0313 9.92188 20.9923 12.1093L20.905 12.2009L12 21.3334L3.09505 12.2009C0.968317 10.0199 0.968317 6.48363 3.09505 4.30255C5.22178 2.12148 8.6699 2.12148 10.7966 4.30255Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"></path>
-                    </svg>
-                  </button>
-
-                  <button 
-                    type="button" 
-                    className="rounded-full transition relative flex items-center justify-center active:scale-[0.96] p-[10px] text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 transform-gpu"
-                    aria-label="View Cart"
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-700" style={{width:"24px", height:"24px"}} stroke="none">
-                      <path d="M1.0036 2.19434H4.2515L5.05542 6.5249M5.05542 6.5249L7.10589 17.3512H19.1297L20.7536 6.5249H5.05542Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-                      <path d="M7.22081 23.5556C8.10629 23.5556 8.82411 22.8378 8.82411 21.9524C8.82411 21.0669 8.10629 20.3491 7.22081 20.3491C6.33534 20.3491 5.61752 21.0669 5.61752 21.9524C5.61752 22.8378 6.33534 23.5556 7.22081 23.5556ZM17.7765 23.5556C18.662 23.5556 19.3798 22.8378 19.3798 21.9524C19.3798 21.0669 18.662 20.3491 17.7765 20.3491C16.891 20.3491 16.1732 21.0669 16.1732 21.9524C16.1732 22.8378 16.891 23.5556 17.7765 23.5556Z" fill="currentColor" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                    </svg>
-                  </button>
-                </div>
-
-                            {/* Authentication Section */}
-                            {isAuthenticated ? (
-                                <div className="ml-2 flex items-center gap-2">
-                                    <div className="hidden sm:flex items-center gap-2">
-                                        {user?.avatarUrl && (
-                                            <img 
-                                                src={user.avatarUrl} 
-                                                alt={user.name} 
-                                                className="w-8 h-8 rounded-full"
-                                            />
-                                        )}
-                                        <span className="text-sm font-medium text-gray-700">
-                                            {user?.name}
-                                        </span>
-                                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                            </svg>
-                                            <span>{user?.points} pts</span>
-                                        </div>
-                                    </div>
-                                    <button 
-                                        onClick={handleLogout}
-                                        className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
-                                    >
-                                        <span>Logout</span>
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="ml-2 flex items-center gap-2">
-                                    <Link 
-                                        to="/login"
-                                        className="bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
-                                    >
-                                        <span>Sign in</span>
-                                    </Link>
-                                    <Link 
-                                        to="/signup"
-                                        className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-sm font-medium rounded-lg min-w-[72px] px-2 py-2 transition active:scale-[0.99] relative"
-                                    >
-                                        <span>Sign up</span>
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </header>
-
-          {/* Search Section */}
-          <div data-testid="SearchInputWrapper" className="pointer-events-none relative top-0 z-10 flex items-center justify-center lg:absolute lg:inset-x-[230px] lg:h-full xl:inset-x-[250px] ease-[cubic-bezier(0.42,0,0.58,1)] transition-opacity lg:visible">
-            <div className="pointer-events-auto w-full px-4 lg:w-[75%] lg:min-w-[380px] lg:max-w-[500px]">
-              {/* Desktop Search */}
-              <div className="hidden lg:block">
-                <div data-testid="search" className="focus-within:z-[10] focus-within:shadow-md group flex flex-row justify-center rounded-full">
-                  <div className="w-full relative">
-                    <div className="flex flex-row gap-4">
-                      <div className="relative flex flex-1 items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute left-[16px] text-gray-700 opacity-60 lg:left-[18px]" data-testid="icon-search" style={{width:"20px", height:"20px"}} stroke="none">
-                          <path d="M20 20L16.05 16.05M18 11C18 14.866 14.866 18 11 18C7.13401 18 4 14.866 4 11C4 7.13401 7.13401 4 11 4C14.866 4 18 7.13401 18 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path>
-                        </svg>
-                        <input 
-                          name="search" 
-                          type="search" 
-                          role="searchbox" 
-                          autoComplete="off" 
-                          data-testid="search-input"
-                          aria-label="Search products and stores" 
-                          placeholder="" 
-                          className="h-[43px] w-full overflow-hidden rounded-full border py-3 pl-12 pr-9 text-gray-900 placeholder:text-gray-600 placeholder:opacity-60 lg:h-[52px] bg-gray-100 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div aria-hidden="true" className="pointer-events-none absolute bottom-[4px] left-[49px] flex h-full items-center overflow-hidden lg:bottom-[0px] lg:top-[0] opacity-100">
-                      <div className="relative block h-full py-4 text-gray-500">
-                        <div className="block" id="search-placeholder" aria-live="off" role="status">
-                          <div className="h-full text-ellipsis" style={{whiteSpace: "normal", display: "flex", height: "20.7875px"}}>
-                            <div style={{opacity: 1, transform: "translateY(0%)"}}>Yoga mats with good grip</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div data-testid="search-suggestions" className="top-full w-full overflow-y-auto overflow-x-hidden rounded-b-full border border-t-0 bg-white py-2 hidden absolute z-10 border-gray-200">
-                      <p className="text-sm font-medium mb-1 text-gray-600 px-4" id="search-suggestions">Suggested searches</p>
-                      <ul className="flex flex-col px-2">
-                        {["Plant-based protein powders", "Vegan leather handbags", "Bedroom decor", "Waterproof jackets", "Hoodies", "Running shoes", "Gentle cleanser", "Indoor plants"].map((suggestion, index) => (
-                          <li key={index} role="button" className="flex cursor-pointer items-center justify-between overflow-hidden rounded-lg py-1 hover:bg-gray-100 px-1" data-testid="typeahead-item">
-                            <div className="flex w-full min-w-0 items-center gap-3 truncate">
-                              <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border border-solid border-gray-200">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-700 opacity-60" data-testid="icon-search" style={{width:"16px", height:"16px"}} stroke="none">
-                                  <path d="M20 20L16.05 16.05M18 11C18 14.866 14.866 18 11 18C7.13401 18 4 14.866 4 11C4 7.13401 7.13401 4 11 4C14.866 4 18 7.13401 18 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path>
-                                </svg>
-                              </div>
-                              <div className="flex h-8 items-center">
-                                <p className="text-base font-normal">{suggestion}</p>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
-
-              {/* Mobile Search */}
-              <div className="pb-2 lg:hidden">
-                <div data-testid="mobile-search" className="focus-within:z-[10] focus-within:shadow-md group flex flex-row justify-center rounded-full">
-                  <div className="w-full">
-                    <div className="flex flex-row gap-4">
-                      <div className="relative flex flex-1 items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute left-[16px] text-gray-700 opacity-60 lg:left-[18px]" data-testid="icon-search" stroke="none" style={{width: "20px", height: "20px"}}>
-                          <path d="M20 20L16.05 16.05M18 11C18 14.866 14.866 18 11 18C7.13401 18 4 14.866 4 11C4 7.13401 7.13401 4 11 4C14.866 4 18 7.13401 18 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path>
-                        </svg>
-                        <input 
-                          name="search" 
-                          type="search" 
-                          role="searchbox" 
-                          autoComplete="off" 
-                          data-testid="search-input"
-                          aria-label="Search products and stores" 
-                          placeholder="" 
-                          className="h-[43px] w-full overflow-hidden rounded-full border-0 py-3 pl-12 pr-9 text-gray-900 placeholder:text-gray-600 placeholder:opacity-60 lg:h-[52px] border-none bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div aria-hidden="true" className="pointer-events-none absolute bottom-[4px] flex h-full items-center overflow-hidden lg:bottom-[0px] lg:top-[0] opacity-100 left-[68px] lg:left-[65px]">
-                      <div className="relative block h-full py-4 text-gray-500">
-                        <div className="block" id="search-placeholder" aria-live="off" role="status">
-                          <div className="h-full text-ellipsis" style={{whiteSpace: "normal", display: "flex", height: "0px"}}>
-                            <div style={{opacity: 1, transform: "translateY(0%)"}}>Eco-friendly home decor</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div data-testid="search-suggestions" className="w-full overflow-y-auto overflow-x-hidden rounded-b-full bg-white py-2 hidden absolute bottom-0 left-0 right-0 top-[44px] z-10 border-0 px-4 pt-6" style={{height: "100vh"}}>
-                      <h4 className="text-lg font-semibold mb-3 text-gray-900" id="search-suggestions">Suggested searches</h4>
-                      <ul className="flex flex-col">
-                        {["Plant-based protein powders", "Vegan leather handbags", "Bedroom decor", "Waterproof jackets", "Hoodies", "Running shoes", "Gentle cleanser", "Indoor plants"].map((suggestion, index) => (
-                          <li key={index} role="button" className="flex cursor-pointer items-center justify-between overflow-hidden rounded-lg py-1 hover:bg-gray-100" data-testid="typeahead-item">
-                            <div className="flex w-full min-w-0 items-center gap-3 truncate">
-                              <div className="flex w-10 h-10 shrink-0 items-center justify-center rounded-lg border border-solid border-gray-200">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-700 opacity-60" data-testid="icon-search" stroke="none" style={{width: "16px", height: "16px"}}>
-                                  <path d="M20 20L16.05 16.05M18 11C18 14.866 14.866 18 11 18C7.13401 18 4 14.866 4 11C4 7.13401 7.13401 4 11 4C14.866 4 18 7.13401 18 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></path>
-                                </svg>
-                              </div>
-                              <div className="flex h-8 items-center">
-                                <p className="text-base font-normal">{suggestion}</p>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <input
+                type="search"
+                placeholder="Search for items..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center space-x-4">
+            {/* Favorites */}
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+
+            {/* Authentication */}
+            {isAuthenticated ? (
+              <div className="relative" ref={dropdownRef}>
+                {/* Profile Button */}
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-expanded={isDropdownOpen}
+                  aria-haspopup="true"
+                >
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.name} 
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                      <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="hidden sm:block text-left">
+                    <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                    <div className="text-xs text-gray-500">{user?.points} pts</div>
+                  </div>
+                  <svg 
+                    className={`h-4 w-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    {/* User Info (Mobile) */}
+                    <div className="sm:hidden px-4 py-3 border-b border-gray-200">
+                      <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                      <div className="text-sm text-gray-500">{user?.points} points</div>
+                    </div>
+                    
+                    {/* Menu Items */}
+                    <Link
+                      to={`/profile/${user?.name}`}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      View Profile
+                    </Link>
+                    
+                    <Link
+                      to="/create-listing"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create New Listing
+                    </Link>
+                    
+                    <Link
+                      to="/my-listings"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                      My Listings
+                    </Link>
+                    
+                    <div className="border-t border-gray-200 my-1"></div>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <svg className="h-4 w-4 mr-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Link 
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link 
+                  to="/signup"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Search */}
+        <div className="lg:hidden pb-3">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="search"
+              placeholder="Search for items..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
       </div>
-
+    </header>
   );
-}
+};
 
 export default Header;

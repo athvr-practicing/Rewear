@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import CategoryGrid from './components/CategoryGrid';
@@ -200,6 +200,33 @@ const HomePage: FC<HomePageProps> = ({ favorites, onFavoriteToggle }) => {
   );
 };
 
+// Create a simple component that opens the listing modal
+const CreateListing: FC = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Create New Listing</h1>
+        <p className="text-gray-600 mb-8">Add a new item to your closet</p>
+        
+        {/* This would contain the listing form directly, or redirect to profile */}
+        <div className="bg-white rounded-lg shadow-sm border p-8">
+          <p className="text-gray-500 mb-4">
+            Please use the "Add New Item" button in your profile to create listings.
+          </p>
+          <button 
+            onClick={() => navigate('/profile/Sarah_M')} // Navigate to profile
+            className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Go to My Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App: FC = () => {
   const [favorites, setFavorites] = useState<Array<string | number>>([]);
   const [currentUser] = useState<string>('Sarah_M'); // Mock logged-in user
@@ -247,6 +274,7 @@ const App: FC = () => {
                 />
               } 
             />
+            <Route path="/create-listing" element={<CreateListing />} />
           </Routes>
         </div>
       </Router>
