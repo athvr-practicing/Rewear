@@ -1,4 +1,4 @@
-import { type FC, useState, useEffect } from 'react';
+import { type FC, useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { Product } from '../types';
@@ -379,19 +379,40 @@ const UserProfile: FC<UserProfileProps> = ({
   currentUser 
 }) => {
   const { username } = useParams<{ username: string }>();
-  const { user: currentAuthUser } = useAuth();
+  const { user: currentAuthUser, loading: authLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userItems, setUserItems] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Calculate isOwnProfile with proper error handling and case-insensitive comparison
+  const isOwnProfile = useMemo(() => {
+    if (!currentAuthUser || !username || authLoading) {
+      return false;
+    }
+    
+    // Case-insensitive comparison and trim whitespace
+    const authUserName = currentAuthUser.name?.toLowerCase().trim();
+    const profileUsername = username.toLowerCase().trim();
+    
+    console.log('🔍 Auth check:', {
+      authUserName,
+      profileUsername,
+      isOwn: authUserName === profileUsername,
+      authLoading,
+      currentAuthUser: currentAuthUser.name
+    });
+    
+    return authUserName === profileUsername;
+  }, [currentAuthUser, username, authLoading]);
+
   // Fetch user items when component mounts or username changes
   useEffect(() => {
-    if (username) {
+    if (username && !authLoading) {
       fetchUserItems();
     }
-  }, [username]);
+  }, [username, authLoading, isOwnProfile]);
 
   const fetchUserItems = async () => {
     try {
@@ -401,6 +422,7 @@ const UserProfile: FC<UserProfileProps> = ({
       console.log('🔍 Fetching items for user:', username);
       console.log('🔍 Current authenticated user:', currentAuthUser?.name);
       console.log('🔍 Is own profile:', isOwnProfile);
+      console.log('🔍 Auth loading:', authLoading);
       
       // Use backend filtering by uploader name for better performance
       const url = new URL('http://localhost:4000/api/items');
@@ -435,7 +457,20 @@ const UserProfile: FC<UserProfileProps> = ({
 
   const handleListingSubmit = async (data: ListingFormData) => {
     try {
+      console.log('🔧 Starting listing submission...');
+      console.log('🔧 Form data:', data);
+      console.log('🔧 Current user:', currentAuthUser);
+      
       setError(null);
+      
+      // Validate required fields
+      if (!data.title || !data.description || !data.category || !data.type || !data.size || !data.condition) {
+        throw new Error('Please fill in all required fields');
+      }
+      
+      if (!data.image) {
+        throw new Error('Please upload an image');
+      }
       
       // Create the item first
       const itemData = {
@@ -449,6 +484,9 @@ const UserProfile: FC<UserProfileProps> = ({
         swapPreference: data.swapPreference,
       };
 
+      console.log('🔧 Sending API request to create item...');
+      console.log('🔧 Item data:', itemData);
+      
       const response = await fetch('http://localhost:4000/api/upload/item', {
         method: 'POST',
         headers: {
@@ -458,22 +496,32 @@ const UserProfile: FC<UserProfileProps> = ({
         body: JSON.stringify(itemData),
       });
 
+      console.log('🔧 API response status:', response.status);
+      console.log('🔧 API response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ API error response:', errorData);
         throw new Error(errorData.message || 'Failed to create listing');
       }
 
       const result = await response.json();
+      console.log('✅ API success response:', result);
       
       if (result.success) {
+        console.log('🔧 Item created successfully, now uploading image...');
+        
         // Upload image to S3 if provided
         if (data.image && result.data.uploadUrl) {
+          console.log('🔧 Uploading image to S3...');
           await uploadImageToS3(data.image, result.data.uploadUrl);
+          console.log('✅ Image uploaded successfully');
         }
         
         // Show success notification
         setNotification({ type: 'success', message: 'Item listed successfully!' });
         
+        console.log('🔧 Refreshing user items...');
         // Refresh user items to show the new listing
         await fetchUserItems();
         
@@ -483,7 +531,7 @@ const UserProfile: FC<UserProfileProps> = ({
         throw new Error(result.message || 'Failed to create listing');
       }
     } catch (error) {
-      console.error('Error creating listing:', error);
+      console.error('❌ Error creating listing:', error);
       setNotification({ 
         type: 'error', 
         message: error instanceof Error ? error.message : 'Error creating listing. Please try again.' 
@@ -524,6 +572,31 @@ const UserProfile: FC<UserProfileProps> = ({
     }
   };
 
+  const testBackendConnection = async () => {
+    try {
+      console.log('🔧 Testing backend connection...');
+      const response = await fetch('http://localhost:4000/api/test-backend', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      console.log('🔧 Backend test response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Backend test successful:', data);
+        setNotification({ type: 'success', message: 'Backend connection successful!' });
+      } else {
+        console.error('❌ Backend test failed:', response.status);
+        setNotification({ type: 'error', message: 'Backend connection failed!' });
+      }
+    } catch (error) {
+      console.error('❌ Backend test error:', error);
+      setNotification({ type: 'error', message: 'Cannot connect to backend. Is it running?' });
+    }
+    setTimeout(() => setNotification(null), 5000);
+  };
+
   if (!username) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -535,7 +608,17 @@ const UserProfile: FC<UserProfileProps> = ({
     );
   }
 
-  const isOwnProfile = currentAuthUser?.name === username;
+  // Show loading state if auth is still loading
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -665,12 +748,20 @@ const UserProfile: FC<UserProfileProps> = ({
               }
             </p>
             {isOwnProfile && (
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="mt-4 bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors"
-              >
-                Add Items
-              </button>
+              <div className="flex justify-center space-x-4 mt-4">
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Add Items
+                </button>
+                <button 
+                  onClick={testBackendConnection}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-full font-medium hover:bg-gray-600 transition-colors text-sm"
+                >
+                  Test Backend
+                </button>
+              </div>
             )}
           </div>
         ) : (

@@ -7,6 +7,16 @@ const listItem = require("../controllers/list.controller");
 const specificItem = require("../controllers/specificItem.controller")
 const swapItem = require("../controllers/swap.controller");
 
+// Test endpoint to verify backend is working
+router.get('/test-backend', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend is working correctly',
+    timestamp: new Date().toISOString(),
+    user: req.user ? { name: req.user.name, email: req.user.email } : null
+  });
+});
+
 // Test endpoint for S3 upload
 router.get('/test-s3', async (req, res) => {
   try {
